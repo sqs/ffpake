@@ -1,0 +1,8 @@
+<!ENTITY ffpake.label "Your localized menuitem">
+<!ENTITY ffpakeContext.label "Your Menuitem">
+<!ENTITY ffpakeContext.accesskey "Y">
+<!ENTITY ffpakeToolbarButton.label "Your Toolbar Button">
+<!ENTITY ffpakeToolbarButton.tooltip "This is your toolbar button!">
+<!ENTITY ffpakeSidebar.label "Your Sidebar">
+<!ENTITY ffpakeToolbar.name  "example">
+<!ENTITY ffpakeToolbar.label "This is an example toolbar. You can hide it under View &gt; toolbars &gt; &ffpakeToolbar.name;">

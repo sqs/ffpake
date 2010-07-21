@@ -1,0 +1,6 @@
+content   ffpake                 chrome/content/
+skin      ffpake   classic/1.0   chrome/skin/
+locale    ffpake   en-US         chrome/locale/en-US/
+
+
+overlay   chrome://browser/content/browser.xul   chrome://ffpake/content/ff-overlay.xul
