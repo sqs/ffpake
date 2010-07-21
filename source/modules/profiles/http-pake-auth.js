@@ -26,29 +26,7 @@ PAKEAuthProfile.prototype = {
     this._profile = realm.amcd.methods[this.name];
     this._log = Log4Moz.repository.getLogger(this._logName);
     this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
-  },
-
-  _paramGen: function(names, params) {
-    // use param names defined in amcd
-    if (names) {
-      let renamed = {};
-      for (let key in params) {
-        renamed[names[key]? names[key] : key] = params[key];
-      }
-      params = renamed;
-    }
-
-    // generate urlencoded params
-    let out = "";
-    let fencepost = false;
-    for (key in params) {
-      if (fencepost)
-        out += '&';
-      out += key + '=' + encodeURIComponent(params[key]);
-      fencepost = true;
-    }
-
-    return out;
+    this._log.debug("PAKEAuthProfile._init()");
   },
 
   sessionstatus: function() {
