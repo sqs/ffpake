@@ -4,3 +4,5 @@ locale    ffpake   en-US         chrome/locale/en-US/
 
 
 overlay   chrome://browser/content/browser.xul   chrome://ffpake/content/ff-overlay.xul
+
+resource ffpake modules/
