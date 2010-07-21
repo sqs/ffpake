@@ -2,6 +2,7 @@
 <?xml-stylesheet href="chrome://ffpake/skin/overlay.css" type="text/css"?>
 <!DOCTYPE overlay SYSTEM "chrome://ffpake/locale/overlay.dtd">
 <overlay id="ffpake-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script src="ffpake.js"/>
   <script src="overlay.js"/>
   <script src="ff-overlay.js"/>
 
@@ -13,3 +14,4 @@
 
 
 </overlay>
+

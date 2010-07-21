@@ -8,8 +8,6 @@
     <em:creator>ffpake@scs.stanford.edu</em:creator>
     <em:contributor></em:contributor>
     <em:description>FFPake</em:description>
-    <em:aboutURL>chrome://ffpake/content/about.xul</em:aboutURL>
-    <em:optionsURL>chrome://ffpake/content/options.xul</em:optionsURL>
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id> <!-- Firefox -->
