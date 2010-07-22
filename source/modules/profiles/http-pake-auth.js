@@ -62,12 +62,14 @@ PAKEAuthProfile.prototype = {
       password = logins[0].password;
     }
 
+    // this._pake.client_set_credentials(username, this._realm.realmUrl, password);
+
     this._log.debug("log in as user='" + username + "' password='" + password + "'");
     
-    let res = new Resource(this._realm.domain.obj.resolve(connect.path));
-    res.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-    let ret = res.post(params);
-    this._realm.statusChange(ret.headers['X-Account-Management-Status']);
+    // let res = new Resource(this._realm.domain.obj.resolve(connect.path));
+    // res.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    // let ret = res.post(params);
+    // this._realm.statusChange(ret.headers['X-Account-Management-Status']);
   },
 
   disconnect: function() {
