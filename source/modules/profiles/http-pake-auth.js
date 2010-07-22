@@ -45,13 +45,13 @@ PAKEAuthProfile.prototype = {
       return;
     this._log.trace('Connecting');
 
-    if (this._profile.connect && this._profile.connect.method == 'POST') {
-      this._connect_POST();
+    if (this._profile.connect) {
+      this._do_connect();
     } else {
-      this._log.warn('No supported methods in common for connect');
+      this._log.warn('No supported methods for connect');
     }
   },
-  _connect_POST: function() {
+  _do_connect: function() {
     let connect = this._profile.connect;
     let logins = Utils.getLogins(this._realm.domain, this._realm.realmUrl, null, true);
     let username, password;
@@ -60,14 +60,8 @@ PAKEAuthProfile.prototype = {
       password = logins[0].password;
     }
 
-    let params = 
-      connect.params.username + '=' + encodeURIComponent(username) + '&' +
-      connect.params.password + '=' + encodeURIComponent(password);
-
-    if (this._realm.token)
-      params += '&' + connect.params.token + '=' +
-        encodeURIComponent(this._realm.token);
-
+    this._log.debug("log in as user='" + username + "' password='" + password + "'");
+    
     let res = new Resource(this._realm.domain.obj.resolve(connect.path));
     res.headers['Content-Type'] = 'application/x-www-form-urlencoded';
     let ret = res.post(params);
