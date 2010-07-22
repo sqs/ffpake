@@ -110,38 +110,5 @@ PAKEAuthProfile.prototype = {
     }
 
     this._realm.statusChange(res.get().headers['X-Account-Management-Status']);
-  },
-
-  register: function() {
-    if (!this._realm.lock(this._realm.REGISTERING))
-      return;
-    let reg = this._profile.register;
-
-    if (reg && reg.method == 'POST') {
-      this._log.debug("Registering a new account");
-      let url = this._realm.domain.obj.resolve(reg.path);
-      let res = new Resource(url);
-      res.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-      let id;
-      if (this._profile.register.type == "email") {
-        id = this._realm.email;
-      } else if (this._profile.register.type == "username") {
-        id = this._realm.username;
-      } else {
-        this._log.warn("Unknown registration id type: " +
-                       this._profile.register.type);
-        return;
-      }
-      let secret = Utils.makeRandom(reg.secret_maxlength? reg.secret_maxlength : 16);
-      let params = this._paramGen(reg.params, {id: id, secret: secret});
-      let ret = res.post(params);
-      if (ret.status >= 200 && ret.status < 400) {
-        this._realm.statusChange(ret.headers['X-Account-Management-Status']);
-        Utils.persistLogin(id, secret, this._realm.domain, this._realm.realmUrl);
-      }
-
-    } else {
-      this._log.warn('No supported methods in common for connect');
-    }
   }
 };
