@@ -1,0 +1,12 @@
+[submodule "source/ext/pake"]
+	path = source/ext/pake
+	url = git@github.com:sqs/pake.git
+[submodule "source/ext/jspake"]
+	path = source/ext/jspake
+	url = http://github.com/sqs/jspake.git
+[submodule "source/modules/ext/jspake"]
+	path = source/modules/ext/jspake
+	url = http://github.com/sqs/jspake.git
+[submodule "source/modules/ext/pake"]
+	path = source/modules/ext/pake
+	url = git@github.com:sqs/pake.git
