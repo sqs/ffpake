@@ -1,6 +1,6 @@
 [submodule "source/modules/ext/jspake"]
 	path = source/modules/ext/jspake
-	url = http://github.com/sqs/jspake.git
+	url = git@github.com:sqs/jspake.git
 [submodule "source/modules/ext/pake"]
 	path = source/modules/ext/pake
 	url = git@github.com:sqs/pake.git
