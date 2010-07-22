@@ -38,7 +38,7 @@ FFPake.prototype = {
 var ffpake;
 window.addEventListener("load", function(e) { 
         ffpake = new FFPake(); 
-        ffpake.startup(); }, 
-    false);
+        ffpake.startup();
+    }, false);
 window.addEventListener("unload", function(e) { ffpake.shutdown(); }, false);
 
