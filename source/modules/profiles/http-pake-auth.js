@@ -25,8 +25,8 @@ PAKEAuthProfile.prototype = {
     this._realm = realm;
     this._profile = realm.amcd.methods[this.name];
     this._log = Log4Moz.repository.getLogger(this._logName);
-    this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
-    this._log.debug("PAKEAuthProfile._init()");
+    this._log.level = Log4Moz.Level['All'/*Svc.Prefs.get(this._logPref)*/];
+    this._log.debug("PAKEAuthProfile._init(realm=" + realm + ")");
   },
 
   sessionstatus: function() {
