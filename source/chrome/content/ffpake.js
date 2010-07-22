@@ -8,7 +8,7 @@ Cu.import("resource://ffpake/profiles/http-pake-auth.js");
 
 function FFPake() {
     this._log = Log4Moz.repository.getLogger("FFPake");
-    this._log.level = "All";
+    this._log.level = Log4Moz.Level["All"];
 }
 
 FFPake.prototype = {
