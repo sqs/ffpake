@@ -66,6 +66,13 @@ PAKEAuthProfile.prototype = {
 
     this._log.debug("log in as user='" + username + "' password='" + password + "'");
     
+    let res = new Resource(this._realm.domain.obj.resolve(connect.path));
+    res.headers['Authorization'] = 'Tcpcrypt username="' + username + '"' +
+                                   ' realm="' + this._realm.realmUrl + '"';
+    this._log.trace("REQ Authorization: " + res.headers['Authorization']);
+    
+    let ret = res.get();
+    this._log.trace('RES WWW-Authenticate: ' + ret.headers['WWW-Authenticate']);
     // let res = new Resource(this._realm.domain.obj.resolve(connect.path));
     // res.headers['Content-Type'] = 'application/x-www-form-urlencoded';
     // let ret = res.post(params);
