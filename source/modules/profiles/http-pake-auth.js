@@ -11,7 +11,7 @@ Cu.import("resource://weave-identity/ext/log4moz.js");
 Cu.import("resource://weave-identity/ext/resource.js");
 Cu.import("resource://weave-identity/constants.js");
 Cu.import("resource://weave-identity/util.js");
-//Cu.import("resource://ffpake/ext/jspake/core/pake.js");
+Cu.import("resource://ffpake/ext/jspake/core/pake.ctypes.js");
 
 function PAKEAuthProfile(realm) {
   this._init(realm);
@@ -25,7 +25,7 @@ PAKEAuthProfile.prototype = {
   _init: function(realm) {
     this._realm = realm;
     this._profile = realm.amcd.methods[this.name];
-    this._pake = {};
+    this._pake = new pake(1);
     this._log = Log4Moz.repository.getLogger(this._logName);
     this._log.level = Log4Moz.Level['All'/*Svc.Prefs.get(this._logPref)*/];
     this._log.debug("PAKEAuthProfile._init(realm=" + realm + ")");
@@ -62,10 +62,11 @@ PAKEAuthProfile.prototype = {
       password = logins[0].password;
     }
 
-    // this._pake.client_set_credentials(username, this._realm.realmUrl, password);
+    this._log.debug("pake client_set_credentials(" + username + ", " + this._realm.realmUrl + ", " + password + ")");
 
-    this._log.debug("log in as user='" + username + "' password='" + password + "'");
-    
+    this._pake.client_set_credentials(username, this._realm.realmUrl, password);
+    this._log.trace("set pake credentials");
+  
     let res = new Resource(this._realm.domain.obj.resolve(connect.path));
     res.headers['Authorization'] = 'Tcpcrypt username="' + username + '"' +
                                    ' realm="' + this._realm.realmUrl + '"';
