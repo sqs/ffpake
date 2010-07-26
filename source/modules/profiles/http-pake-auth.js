@@ -74,6 +74,13 @@ PAKEAuthProfile.prototype = {
     
     let ret = res.get();
     this._log.trace('RES WWW-Authenticate: ' + ret.headers['WWW-Authenticate']);
+
+    let www_auth1 = ret.headers['WWW-Authenticate'];
+    let server_Y_start = www_auth1.indexOf('Y=') + 3;
+    let server_Y = www_auth1.substr(server_Y_start,
+                                    www_auth1.length - server_Y_start - 1);
+    this._log.trace('Y = "' + server_Y + '"');
+    this._pake.client_recv_Y(server_Y);
     // let res = new Resource(this._realm.domain.obj.resolve(connect.path));
     // res.headers['Content-Type'] = 'application/x-www-form-urlencoded';
     // let ret = res.post(params);
