@@ -67,6 +67,8 @@ HTTPPAKEAuth.prototype = {
                        "X=\"" + this._pake.client_get_X_string() + "\" " +
                        "respc=\"" + this._pake.compute_respc(sid) + "\"";
         }
+        
+        // TODO(sqs): mutual auth -- check resps
 
         this._log.trace("PAKE response: " + response + "\n");
         return response;
