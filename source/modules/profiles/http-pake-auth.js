@@ -11,7 +11,6 @@ Cu.import("resource://ffpake/ext/log4moz.js");
 Cu.import("resource://weave-identity/ext/resource.js");
 Cu.import("resource://weave-identity/constants.js");
 Cu.import("resource://weave-identity/util.js");
-Cu.import("resource://ffpake/ext/jspake/core/pake.ctypes.js");
 
 function PAKEAuthProfile(realm) {
   this._init(realm);
@@ -25,7 +24,6 @@ PAKEAuthProfile.prototype = {
   _init: function(realm) {
     this._realm = realm;
     this._profile = realm.amcd.methods[this.name];
-    this._pake = new pake(1);
     this._log = Log4Moz.repository.getLogger(this._logName);
     this._log.level = Log4Moz.Level['All'/*Svc.Prefs.get(this._logPref)*/];
     this._log.debug("PAKEAuthProfile._init(realm=" + realm + ")");
@@ -64,41 +62,29 @@ PAKEAuthProfile.prototype = {
 
     this._log.debug("pake client_set_credentials(" + username + ", " + this._realm.realmUrl + ", " + password + ")");
 
-    this._pake.client_set_credentials(username, this._realm.realmUrl, password);
-    this._log.trace("set pake credentials");
-  
+    let pakeAuth = Components.classes['@mozilla.org/network/http-authenticator;1?scheme=pake'].createInstance(Components.interfaces.nsIHttpAuthenticator);
+    
+    let chal = "PAKE realm=\"" + this._realm.realmUrl + "\"";
+    let resp = pakeAuth.generateCredentials(null, chal, false, null,
+                                            username, password, {}, {}, {});
+
     let res = new Resource(this._realm.domain.obj.resolve(connect.path));
-    res.headers['Authorization'] = 'Tcpcrypt username="' + username + '"' +
-                                   ' realm="' + this._realm.realmUrl + '"';
-    this._log.trace("REQ1 Authorization: " + res.headers['Authorization']);
-    
+    res.headers['Authorization'] = resp;
+
     let ret = res.get();
-    this._log.trace('RES1 WWW-Authenticate: ' + ret.headers['WWW-Authenticate']);
-
-    let www_auth1 = ret.headers['WWW-Authenticate'];
-    let server_Y_start = www_auth1.indexOf('Y=') + 3;
-    let server_Y = www_auth1.substr(server_Y_start,
-                                    www_auth1.length - server_Y_start - 1);
-    this._log.trace('Y = "' + server_Y + '"');
-    this._pake.client_recv_Y(server_Y);
-
-    let sid = 1122334455;
-    res.headers['Authorization'] = 
-        'Tcpcrypt username="' + username + '"' +
-        ' realm="' + this._realm.realmUrl + '"' +
-        ' X="' + this._pake.client_get_X_string() + '"' +
-        ' respc="' + this._pake.compute_respc(sid) + '"';
-
-    this._log.trace('REQ2 Authorization: ' + res.headers['Authorization']);
-    
-    ret = res.get();
+    chal = ret.headers['WWW-Authenticate'];
+    resp = pakeAuth.generateCredentials(null, chal, false, null, 
+                                        username, password, {}, {}, {});
+    res.headers['Authorization'] = resp;
+    ret = res.get()
+    return;
+;
     if (typeof(ret.headers['Authentication-Info']) != 'undefined') {
         this._log.trace('RES2 Authentication-Info: ' + ret.headers['Authentication-Info']);
         // TODO(sqs): mutual auth -- check server resps
     } else {
         this._log.error("HTTP PAKE authentication failed");
         this._log.trace("HTTP response headers: " + ret.headers.toSource());
-        this._log.trace("PAKE debug: " + this._pake.debug());
     }
 
     this._realm.statusChange(ret.headers['X-Account-Management-Status']);
