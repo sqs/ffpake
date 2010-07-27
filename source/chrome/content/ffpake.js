@@ -1,24 +1,31 @@
 
-
-Cu.import("resource://weave-identity/ext/log4moz.js");
-Cu.import("resource://weave-identity/ext/Observers.js");
-Cu.import("resource://weave-identity/profilemanager.js");
-Cu.import("resource://ffpake/profiles/http-pake-auth.js");
-
+try {
+    Cu.import("resource://weave-identity/ext/log4moz.js");
+    Cu.import("resource://weave-identity/ext/Observers.js");
+    Cu.import("resource://weave-identity/profilemanager.js");
+    Cu.import("resource://ffpake/profiles/http-pake-auth.js");
+} catch (e) {}
 
 function FFPake() {
-    this._log = Log4Moz.repository.getLogger("FFPake");
-    this._log.level = Log4Moz.Level["All"];
+    if (typeof(Log4Moz) != "undefined") {
+        this._log = Log4Moz.repository.getLogger("FFPake");
+        this._log.level = Log4Moz.Level["All"];
+    }
 }
 
 FFPake.prototype = {
     startup: function() {
-        Observers.add("weaveid-profile-manager-start", this, false);
-        this._log.debug("Observing weaveid-profile-manager-start");
+        // Only use if Account Manager is enabled and the PAKE profile loaded.
+        if (typeof(PAKEAuthProfile) != "undefined") {
+            Observers.add("weaveid-profile-manager-start", this, false);
+            this._log.debug("Observing weaveid-profile-manager-start");
+        }
     },
 
     shutdown: function() {
-        Observers.remove("weaveid-profile-manager-start", this, false);
+        if (typeof(PAKEAuthProfile) != "undefined") {
+            Observers.remove("weaveid-profile-manager-start", this, false);
+        }
     },
 
     observe: function(subject, topic, data) {
