@@ -2,7 +2,7 @@
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");  
 Components.utils.import("resource://ffpake/ext/log4moz.js");
-Components.utils.import("resource://ffpake/ext/util.js");
+Components.utils.import("resource://ffpake/util.js");
 Components.utils.import("resource://ffpake/ext/jspake/core/pake.ctypes.js");
 
 
@@ -23,7 +23,7 @@ HTTPPAKEAuth.prototype = {
 
     init: function() {
         this._log = Log4Moz.repository.getLogger(this._logName);
-        this._log.level = Log4Moz.Level[Svc.Prefs.getCharPref(this._logPref)];
+        this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
         
         // dump("@@@@@@@@@@@@@@@@@@\n");
         // dump(Svc.Prefs.getCharPref(this._logPref));
@@ -44,7 +44,7 @@ HTTPPAKEAuth.prototype = {
             aInvalidatesIdentity.value = true;
         } else {
             // stage 2
-            aInvalidatesIdentity.value = false;
+            aInvalidatesIdentity.value = true;
         }
 
         this._log.trace("PAKE challengeReceived DONE\n");
@@ -53,8 +53,8 @@ HTTPPAKEAuth.prototype = {
     generateCredentials: function(aChannel, aChallenge, aProxyAuth, aDomain,
                                   aUser, aPassword, aSessionState, 
                                   aContinuationState, aFlags) {
-        this._log.trace("PAKE generateCredentials: " + aChallenge + "\n");
-        
+        this._log.trace("PAKE generateCredentials: " + aChallenge + ", user = " + aUser + "\n");
+
         let chal = this._parseHeader(aChallenge);
         let response;
         if (!('Y' in chal)) {
