@@ -13,7 +13,6 @@ FFPake.prototype = {
     _logPref: "log.logger.ffpake",
     
     _initLogs: function FFPake_initLogs() {
-        dump("@@@@@@@@@@@@@@@@@@@@@@@@@@\n" + Log4Moz);
         this._log = Log4Moz.repository.getLogger(this._logName);
         this._log.level = Log4Moz.Level[Svc.Prefs.getCharPref(this._logPref)];
 
