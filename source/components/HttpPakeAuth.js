@@ -96,6 +96,13 @@ HTTPPAKEAuth.prototype = {
         // TODO(sqs): mutual auth -- check resps
 
         this._log.trace("PAKE response: " + response + "\n");
+        
+        // TODO(sqs): check that these are the correct flags
+        aFlags.value = 
+                 Components.interfaces.nsIHttpAuthenticator.CONNECTION_BASED |
+                 Components.interfaces.nsIHttpAuthenticator.REUSABLE_CREDENTIALS |
+                 Components.interfaces.nsIHttpAuthenticator.IDENTITY_ENCRYPTED;
+
         return response;
     },
 
