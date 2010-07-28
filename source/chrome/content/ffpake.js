@@ -1,19 +1,22 @@
 
-try {
-    Cu.import("resource://weave-identity/ext/log4moz.js");
-    Cu.import("resource://weave-identity/ext/Observers.js");
-    Cu.import("resource://weave-identity/profilemanager.js");
-    Cu.import("resource://ffpake/profiles/http-pake-auth.js");
-} catch (e) {}
+
+Components.utils.import("resource://ffpake/ext/log4moz.js");
+Components.utils.import("resource://ffpake/ext/util.js");
+Components.utils.import("resource://weave-identity/ext/Observers.js");
+Components.utils.import("resource://weave-identity/profilemanager.js");
+Components.utils.import("resource://ffpake/profiles/http-pake-auth.js");
 
 function FFPake() {
     if (typeof(Log4Moz) != "undefined") {
-        this._log = Log4Moz.repository.getLogger("FFPake");
-        this._log.level = Log4Moz.Level["All"];
+        this._log = Log4Moz.repository.getLogger(this._logName);
+        this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
     }
 }
 
 FFPake.prototype = {
+    _logName: "FFPake",
+    _logPref: "log.logger.ffpake",
+    
     startup: function() {
         // Only use if Account Manager is enabled and the PAKE profile loaded.
         if (typeof(PAKEAuthProfile) != "undefined") {

@@ -1,16 +1,10 @@
-
-
 const EXPORTED_SYMBOLS = ['PAKEAuthProfile'];
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cr = Components.results;
-const Cu = Components.utils;
-
-Cu.import("resource://ffpake/ext/log4moz.js");
-Cu.import("resource://weave-identity/ext/resource.js");
-Cu.import("resource://weave-identity/constants.js");
-Cu.import("resource://weave-identity/util.js");
+Components.utils.import("resource://ffpake/ext/log4moz.js");
+Components.utils.import("resource://ffpake/ext/util.js");
+Components.utils.import("resource://weave-identity/ext/resource.js");
+Components.utils.import("resource://weave-identity/constants.js");
+Components.utils.import("resource://weave-identity/util.js");
 
 function PAKEAuthProfile(realm) {
   this._init(realm);
@@ -25,8 +19,8 @@ PAKEAuthProfile.prototype = {
     this._realm = realm;
     this._profile = realm.amcd.methods[this.name];
     this._log = Log4Moz.repository.getLogger(this._logName);
-    this._log.level = Log4Moz.Level['All'/*Svc.Prefs.get(this._logPref)*/];
-    this._log.debug("PAKEAuthProfile._init(realm=" + realm + ")");
+    this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
+    this._log.trace("init with realm: '" + realm + "'");
   },
 
   sessionstatus: function() {
