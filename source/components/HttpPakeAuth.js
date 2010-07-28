@@ -5,7 +5,6 @@ Components.utils.import("resource://ffpake/ext/log4moz.js");
 Components.utils.import("resource://ffpake/util.js");
 Components.utils.import("resource://ffpake/ext/jspake/core/pake.ctypes.js");
 
-
 function HTTPPAKEAuth() {
     this.init();
 }
@@ -36,19 +35,7 @@ HTTPPAKEAuth.prototype = {
 
         let chal = this._parseHeader(aChallenge);
         if (!('Y' in chal)) { // stage 1
-            // Prompt the user for a password, UNLESS there are auth
-            // credentials in aContinuationState, which means they were supplied
-            // by PAKEAuthProfile from the Password Mgr.
-            let username = aContinuationState.value && 
-                           aContinuationState.value.username;
-            let password = aContinuationState.value && 
-                           aContinuationState.value.password;
-            if (username && password) {
-                this._log.debug("-- challengeReceived: using username (" + username + ") from continuationState");
-                aInvalidatesIdentity.value = false;
-            } else {
-                aInvalidatesIdentity.value = true;
-            }
+            aInvalidatesIdentity.value = true;
         } else { // stage 2
             // The identity is never invalidated between stages 1 and 2 since
             // they occur in sequence with no additional user prompting. If the
@@ -64,46 +51,41 @@ HTTPPAKEAuth.prototype = {
     generateCredentials: function(aChannel, aChallenge, aProxyAuth, aDomain,
                                   aUser, aPassword, aSessionState, 
                                   aContinuationState, aFlags) {
-        this._log.trace("generateCredentials: " +
-                        "\n\tchallenge: '" + aChallenge + "'" +
-                        "\n\tuser: '" + aUser + "' password: '" + aPassword + "'" +
-                        "\n\tsessionState: " + aSessionState.toSource() +
-                        "\n\tcontinuationState: " + aContinuationState.toSource());
+       this._log.trace("generateCredentials: " +
+                       "\n\tchannel: " + (aChannel ? aChannel.value : "null") + 
+                       "\n\tchallenge: '" + aChallenge + "'" +
+                       "\n\tuser: '" + aUser + "' password: '" + aPassword + "'" +
+                       "\n\tsessionState: " + aSessionState.toSource() +
+                       "\n\tcontinuationState: " + aContinuationState.toSource() +
+                       "\n\tsessionState: " + aSessionState.toSource());
 
-        let chal = this._parseHeader(aChallenge);
-        let response;
-        if (!('Y' in chal)) {
-            // stage 1
-            response = "PAKE username=\"" + aUser + "\" " +
-                       "realm=\"" + chal['realm'] + "\"";
-        } else {
-            // stage 2
-            this._pake.client_set_credentials(aUser, chal['realm'], aPassword);
-            this._pake.client_recv_Y(chal['Y']);
-            let sid = 1122334455;
-            response = "PAKE username=\"" + aUser + "\" " +
-                       "realm=\"" + chal['realm'] + "\" " +
-                       "X=\"" + this._pake.client_get_X_string() + "\" " +
-                       "respc=\"" + this._pake.compute_respc(sid) + "\"";
+       let chal = this._parseHeader(aChallenge);
+       let response;
+       if (!('Y' in chal)) { // stage 1
+           response = "PAKE username=\"" + aUser + "\" " +
+                      "realm=\"" + chal['realm'] + "\"";
+       } else { // stage 2
+           if (!aUser && !aPassword) {
+               // TODO(sqs): The only way to stop this duplicate auth from
+               // happening is to throw here. Calling .cancel() on the channel
+               // doesn't work.
+               throw "must have username and password in stage2 generateCredentials";
+           }
 
-            // Delete the username and password stored in aContinuationState,
-            // since either this auth session succeeds and we don't need them
-            // anymore, or it fails and we should invalidate the credentials on
-            // the next stage1 call to challengeReceived.
-            aContinuationState.value = null;
-        }
+           this._pake.client_set_credentials(aUser, chal['realm'], aPassword);
+           this._pake.client_recv_Y(chal['Y']);
+           let sid = 1122334455;
+           response = "PAKE username=\"" + aUser + "\" " +
+           "realm=\"" + chal['realm'] + "\" " +
+           "X=\"" + this._pake.client_get_X_string() + "\" " +
+           "respc=\"" + this._pake.compute_respc(sid) + "\"";
+       }
         
-        // TODO(sqs): mutual auth -- check resps
+       // TODO(sqs): mutual auth -- check resps
 
-        this._log.trace("PAKE response: " + response + "\n");
-        
-        // TODO(sqs): check that these are the correct flags
-        aFlags.value = 
-                 Components.interfaces.nsIHttpAuthenticator.CONNECTION_BASED |
-                 Components.interfaces.nsIHttpAuthenticator.REUSABLE_CREDENTIALS |
-                 Components.interfaces.nsIHttpAuthenticator.IDENTITY_ENCRYPTED;
-
-        return response;
+       this._log.trace("PAKE response: " + response + "\n");
+       
+       return response;
     },
 
     HeaderParseError: function(header, msg) {

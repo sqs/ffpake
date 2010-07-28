@@ -56,10 +56,13 @@ PAKEAuthProfile.prototype = {
     this._log.debug("pake client_set_credentials(" + username + ", " + this._realm.realmUrl + ", " + password + ")");
 
     let pakeAuth = Components.classes['@mozilla.org/network/http-authenticator;1?scheme=pake'].createInstance(Components.interfaces.nsIHttpAuthenticator);
-    
+
+    // Make fake auth challenge header based on AMCD.
     let chal = "PAKE realm=\"" + this._realm.realmUrl + "\"";
+    
     let resp = pakeAuth.generateCredentials(null, chal, false, null,
-                                            username, password, {}, {}, {});
+                                            username, password, 
+                                            {}, {}, {});
 
     let res = new Resource(this._realm.domain.obj.resolve(connect.path));
     res.headers['Authorization'] = resp;
@@ -67,12 +70,13 @@ PAKEAuthProfile.prototype = {
     let ret = res.get();
     chal = ret.headers['WWW-Authenticate'];
     resp = pakeAuth.generateCredentials(null, chal, false, null, 
-                                        username, password, {}, {}, {});
+                                        username, password, 
+                                        {}, {}, {});
     res.headers['Authorization'] = resp;
-    ret = res.get()
-    return;
-;
-    if (typeof(ret.headers['Authentication-Info']) != 'undefined') {
+    ret = res.get();
+
+    if (ret.success && typeof(ret.headers['Authentication-Info']) != 'undefined') {
+        this._log.debug('PAKEAuthProfile SUCCESS');
         this._log.trace('RES2 Authentication-Info: ' + ret.headers['Authentication-Info']);
         // TODO(sqs): mutual auth -- check server resps
     } else {
