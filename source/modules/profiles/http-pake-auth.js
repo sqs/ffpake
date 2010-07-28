@@ -88,45 +88,5 @@ PAKEAuthProfile.prototype = {
     }
 
     this._realm.statusChange(ret.headers['X-Account-Management-Status']);
-  },
-
-  disconnect: function() {
-    if (!this._realm.lock(this._realm.SIGNING_OUT))
-      return;
-    this._log.trace('Disconnecting');
-
-    if (this._profile.disconnect &&
-        this._profile.disconnect.method == 'POST') {
-      this._disconnect_POST();
-    } else if (this._profile.disconnect &&
-               this._profile.disconnect.method == 'GET') {
-      this._disconnect_GET();
-    } else
-      this._log.warn('No supported methods in common for disconnect');
-  },
-  _disconnect_POST: function() {
-    let disconnect = this._profile.disconnect;
-    let res = new Resource(this._realm.domain.obj.resolve(disconnect.path));
-    let params;
-    if (this._realm.token)
-      params = connect.params.token + '=' + encodeURIComponent(this._realm.token);
-    this._realm.statusChange(res.post(params).headers['X-Account-Management-Status']);
-  },
-  _disconnect_GET: function() {
-    let disconnect = this._profile.disconnect;
-    let res = new Resource(this._realm.domain.obj.resolve(disconnect.path));
-    let params;
-
-    if (this._realm.token) {
-      params = connect.params.token + '=' + encodeURIComponent(this._realm.token);
-      // be careful not to trample any params already there
-      res.uri.QueryInterface(Ci.nsIURL);
-      if (res.uri.query)
-        res.uri.query += '&' + params;
-      else
-        res.uri.query = params;
-    }
-
-    this._realm.statusChange(res.get().headers['X-Account-Management-Status']);
   }
 };
