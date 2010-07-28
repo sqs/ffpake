@@ -42,11 +42,11 @@ const Cr = Components.results;
 const Cu = Components.utils;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://weave-identity/ext/Preferences.js");
-Cu.import("resource://weave-identity/ext/Observers.js");
-Cu.import("resource://weave-identity/ext/StringBundle.js");
-Cu.import("resource://weave-identity/ext/log4moz.js");
-Cu.import("resource://weave-identity/constants.js");
+Cu.import("resource://ffpake/ext/Preferences.js");
+Cu.import("resource://ffpake/ext/Observers.js");
+Cu.import("resource://ffpake/ext/StringBundle.js");
+Cu.import("resource://ffpake/ext/log4moz.js");
+Cu.import("resource://ffpake/constants.js");
 
 /*
  * Utility functions

@@ -2,9 +2,11 @@
 
 Components.utils.import("resource://ffpake/ext/log4moz.js");
 Components.utils.import("resource://ffpake/util.js");
-Components.utils.import("resource://weave-identity/ext/Observers.js");
-Components.utils.import("resource://weave-identity/profilemanager.js");
-Components.utils.import("resource://ffpake/profiles/http-pake-auth.js");
+try {
+    Components.utils.import("resource://weave-identity/ext/Observers.js");
+    Components.utils.import("resource://weave-identity/profilemanager.js");
+    Components.utils.import("resource://ffpake/profiles/http-pake-auth.js");
+} catch (e) {}
 
 function FFPake() { }
 
