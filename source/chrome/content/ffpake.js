@@ -6,18 +6,35 @@ Components.utils.import("resource://weave-identity/ext/Observers.js");
 Components.utils.import("resource://weave-identity/profilemanager.js");
 Components.utils.import("resource://ffpake/profiles/http-pake-auth.js");
 
-function FFPake() {
-    if (typeof(Log4Moz) != "undefined") {
-        this._log = Log4Moz.repository.getLogger(this._logName);
-        this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
-    }
-}
+function FFPake() { }
 
 FFPake.prototype = {
     _logName: "FFPake",
     _logPref: "log.logger.ffpake",
     
+    _initLogs: function FFPake_initLogs() {
+        dump("@@@@@@@@@@@@@@@@@@@@@@@@@@\n" + Log4Moz);
+        this._log = Log4Moz.repository.getLogger(this._logName);
+        this._log.level = Log4Moz.Level[Svc.Prefs.getCharPref(this._logPref)];
+
+        formatter = new Log4Moz.BasicFormatter();
+        root = Log4Moz.repository.rootLogger;
+        root.level = Log4Moz.Level[Svc.Prefs.getCharPref("log.rootLogger")];
+
+        capp = new Log4Moz.ConsoleAppender(formatter);
+        capp.level = Log4Moz.Level[Svc.Prefs.getCharPref("log.appender.console")];
+        root.addAppender(capp);
+
+        dapp = new Log4Moz.DumpAppender(formatter);
+        dapp.level = Log4Moz.Level[Svc.Prefs.getCharPref("log.appender.dump")];
+        root.addAppender(dapp);
+    },
+
     startup: function() {
+        if (typeof(Log4Moz) != "undefined") {
+            this._initLogs();
+        }
+
         // Only use if Account Manager is enabled and the PAKE profile loaded.
         if (typeof(PAKEAuthProfile) != "undefined") {
             Observers.add("weaveid-profile-manager-start", this, false);

@@ -1,4 +1,7 @@
-pref("extensions.ffpake.log.logger.profiles", "All");
+pref("extensions.ffpake.log.rootLogger", "All");
+pref("extensions.ffpake.log.appender.console", "All");
+pref("extensions.ffpake.log.appender.dump", "All");
+pref("extensions.ffpake.log.logger.account", "All");
 pref("extensions.ffpake.log.logger.httpauth", "All");
 pref("extensions.ffpake.log.logger.ffpake", "All");
 

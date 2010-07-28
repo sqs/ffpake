@@ -2,6 +2,7 @@
 
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");  
 Components.utils.import("resource://ffpake/ext/log4moz.js");
+Components.utils.import("resource://ffpake/ext/util.js");
 Components.utils.import("resource://ffpake/ext/jspake/core/pake.ctypes.js");
 
 
@@ -22,7 +23,10 @@ HTTPPAKEAuth.prototype = {
 
     init: function() {
         this._log = Log4Moz.repository.getLogger(this._logName);
-        this._log.level = Log4Moz.Level['All'];
+        this._log.level = Log4Moz.Level[Svc.Prefs.getCharPref(this._logPref)];
+        
+        // dump("@@@@@@@@@@@@@@@@@@\n");
+        // dump(Svc.Prefs.getCharPref(this._logPref));
 
         // TODO(sqs): log4moz not working...
         this._log = {trace: dump};
