@@ -29,24 +29,46 @@ HTTPPAKEAuth.prototype = {
 
     challengeReceived: function(aChannel, aChallenge, aProxyAuth, aSessionState,
                                 aContinuationState, aInvalidatesIdentity) {
-        this._log.trace("PAKE challengeReceived: " + aChallenge + "\n");
+        this._log.trace("challengeReceived: " +
+                        "\n\tchallenge: '" + aChallenge + "'" +
+                        "\n\tsessionState: " + aSessionState.toSource() +
+                        "\n\tcontinuationState: " + aContinuationState.toSource());
 
         let chal = this._parseHeader(aChallenge);
-        if (!('Y' in chal)) {
-            // stage 1
-            aInvalidatesIdentity.value = true;
-        } else {
-            // stage 2
-            aInvalidatesIdentity.value = true;
+        if (!('Y' in chal)) { // stage 1
+            // Prompt the user for a password, UNLESS there are auth
+            // credentials in aContinuationState, which means they were supplied
+            // by PAKEAuthProfile from the Password Mgr.
+            let username = aContinuationState.value && 
+                           aContinuationState.value.username;
+            let password = aContinuationState.value && 
+                           aContinuationState.value.password;
+            if (username && password) {
+                this._log.debug("-- challengeReceived: using username (" + username + ") from continuationState");
+                aInvalidatesIdentity.value = false;
+            } else {
+                aInvalidatesIdentity.value = true;
+            }
+        } else { // stage 2
+            // The identity is never invalidated between stages 1 and 2 since
+            // they occur in sequence with no additional user prompting. If the
+            // credentials are invalid, the client discovers that after stage2.
+            aInvalidatesIdentity.value = false;
         }
 
-        this._log.trace("PAKE challengeReceived DONE\n");
+        this._log.trace("PAKE challengeReceived DONE, " +
+                        (aInvalidatesIdentity.value ? "invalidate identity" :
+                                                      "don't invalidate identity"));
     },
 
     generateCredentials: function(aChannel, aChallenge, aProxyAuth, aDomain,
                                   aUser, aPassword, aSessionState, 
                                   aContinuationState, aFlags) {
-        this._log.trace("PAKE generateCredentials: " + aChallenge + ", user = " + aUser + "\n");
+        this._log.trace("generateCredentials: " +
+                        "\n\tchallenge: '" + aChallenge + "'" +
+                        "\n\tuser: '" + aUser + "' password: '" + aPassword + "'" +
+                        "\n\tsessionState: " + aSessionState.toSource() +
+                        "\n\tcontinuationState: " + aContinuationState.toSource());
 
         let chal = this._parseHeader(aChallenge);
         let response;
@@ -84,7 +106,7 @@ HTTPPAKEAuth.prototype = {
     _authName: 'PAKE',
 
     _parseHeader: function(header) {
-        this._log.trace("PAKE _parseHeader: " + header + "\n");
+        /// this._log.trace("PAKE _parseHeader: " + header + "\n");
 
         // TODO(sqs): "PAKE" should be case insensitive
         let prefix = this._authName + ' ';
