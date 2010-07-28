@@ -1,7 +1,7 @@
 const EXPORTED_SYMBOLS = ['PAKEAuthProfile'];
 
 Components.utils.import("resource://ffpake/ext/log4moz.js");
-Components.utils.import("resource://ffpake/ext/util.js");
+Components.utils.import("resource://ffpake/util.js");
 Components.utils.import("resource://weave-identity/ext/resource.js");
 Components.utils.import("resource://weave-identity/constants.js");
 
@@ -18,7 +18,7 @@ PAKEAuthProfile.prototype = {
     this._realm = realm;
     this._profile = realm.amcd.methods[this.name];
     this._log = Log4Moz.repository.getLogger(this._logName);
-    this._log.level = Log4Moz.Level['All'];
+    this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
     this._log.debug("init for realm: '" + realm.realmUrl + "'");
   },
 

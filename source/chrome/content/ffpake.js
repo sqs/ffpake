@@ -1,7 +1,7 @@
 
 
 Components.utils.import("resource://ffpake/ext/log4moz.js");
-Components.utils.import("resource://ffpake/ext/util.js");
+Components.utils.import("resource://ffpake/util.js");
 Components.utils.import("resource://weave-identity/ext/Observers.js");
 Components.utils.import("resource://weave-identity/profilemanager.js");
 Components.utils.import("resource://ffpake/profiles/http-pake-auth.js");
@@ -14,18 +14,18 @@ FFPake.prototype = {
     
     _initLogs: function FFPake_initLogs() {
         this._log = Log4Moz.repository.getLogger(this._logName);
-        this._log.level = Log4Moz.Level[Svc.Prefs.getCharPref(this._logPref)];
+        this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
 
         formatter = new Log4Moz.BasicFormatter();
         root = Log4Moz.repository.rootLogger;
-        root.level = Log4Moz.Level[Svc.Prefs.getCharPref("log.rootLogger")];
+        root.level = Log4Moz.Level[Svc.Prefs.get("log.rootLogger")];
 
         capp = new Log4Moz.ConsoleAppender(formatter);
-        capp.level = Log4Moz.Level[Svc.Prefs.getCharPref("log.appender.console")];
+        capp.level = Log4Moz.Level[Svc.Prefs.get("log.appender.console")];
         root.addAppender(capp);
 
         dapp = new Log4Moz.DumpAppender(formatter);
-        dapp.level = Log4Moz.Level[Svc.Prefs.getCharPref("log.appender.dump")];
+        dapp.level = Log4Moz.Level[Svc.Prefs.get("log.appender.dump")];
         root.addAppender(dapp);
     },
 
