@@ -24,13 +24,6 @@ HTTPPAKEAuth.prototype = {
     init: function() {
         this._log = Log4Moz.repository.getLogger(this._logName);
         this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
-        
-        // dump("@@@@@@@@@@@@@@@@@@\n");
-        // dump(Svc.Prefs.getCharPref(this._logPref));
-
-        // TODO(sqs): log4moz not working...
-        this._log = {trace: dump};
-
         this._pake = new pake(1);
     },
 
