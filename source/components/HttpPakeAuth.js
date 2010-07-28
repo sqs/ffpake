@@ -85,6 +85,12 @@ HTTPPAKEAuth.prototype = {
                        "realm=\"" + chal['realm'] + "\" " +
                        "X=\"" + this._pake.client_get_X_string() + "\" " +
                        "respc=\"" + this._pake.compute_respc(sid) + "\"";
+
+            // Delete the username and password stored in aContinuationState,
+            // since either this auth session succeeds and we don't need them
+            // anymore, or it fails and we should invalidate the credentials on
+            // the next stage1 call to challengeReceived.
+            aContinuationState.value = null;
         }
         
         // TODO(sqs): mutual auth -- check resps
