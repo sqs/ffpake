@@ -18,15 +18,15 @@ FFPake.prototype = {
         this._log = Log4Moz.repository.getLogger(this._logName);
         this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
 
-        formatter = new Log4Moz.BasicFormatter();
-        root = Log4Moz.repository.rootLogger;
+        var formatter = new Log4Moz.BasicFormatter();
+        var root = Log4Moz.repository.rootLogger;
         root.level = Log4Moz.Level[Svc.Prefs.get("log.rootLogger")];
 
-        capp = new Log4Moz.ConsoleAppender(formatter);
+        var capp = new Log4Moz.ConsoleAppender(formatter);
         capp.level = Log4Moz.Level[Svc.Prefs.get("log.appender.console")];
         root.addAppender(capp);
 
-        dapp = new Log4Moz.DumpAppender(formatter);
+        var dapp = new Log4Moz.DumpAppender(formatter);
         dapp.level = Log4Moz.Level[Svc.Prefs.get("log.appender.dump")];
         root.addAppender(dapp);
     },
