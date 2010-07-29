@@ -89,20 +89,19 @@ PAKEAuthProfile.prototype = {
 
     this._realm.statusChange(ret.headers['X-Account-Management-Status']);
 
-    this._startAuthInjector(authHeader2);
+    /* TODO(sqs): should allow customization further than just setting the
+     * domain */
+    
+    this._startAuthInjector('localhost', authHeader2);
   },
   
-    _startAuthInjector: function(authHeader) {
+    _startAuthInjector: function(host, authHeader) {
         if (this._authInjector) {
             this._authInjector.unregister();
             this._authInjector = null;
         }
         
-        this._authInjector = new HttpPakeAuthInjector(authHeader);
+        this._authInjector = new HttpPakeAuthInjector(host, authHeader);
         this._authInjector.register();
     }
 };
-
-
-/********************************************/
-

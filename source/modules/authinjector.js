@@ -5,10 +5,10 @@ Components.utils.import("resource://ffpake/ext/log4moz.js");
 Components.utils.import("resource://ffpake/util.js");
 
 
-function HttpPakeAuthInjector(authHeader) {
+function HttpPakeAuthInjector(host, authHeader) {
+    this._host = host;
     this._authHeader = authHeader;
     this._initLogs();
-    //this._log = {trace: dump};
 }
 
 HttpPakeAuthInjector.prototype = {    
@@ -17,9 +17,11 @@ HttpPakeAuthInjector.prototype = {
 
     observe: function(subject, topic, data) {
         if (topic == "http-on-modify-request") {
-            this._log.trace("injecting Authorization: " + this._authHeader);
             var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-            httpChannel.setRequestHeader("Authorization", this._authHeader, false);
+            if (httpChannel.URI.host == this._host) {
+                this._log.trace("injecting Authorization: " + this._authHeader);
+                httpChannel.setRequestHeader("Authorization", this._authHeader, false);
+            }
         }
     },
 
