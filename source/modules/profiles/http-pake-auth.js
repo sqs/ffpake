@@ -4,6 +4,7 @@ Components.utils.import("resource://ffpake/ext/log4moz.js");
 Components.utils.import("resource://ffpake/util.js");
 Components.utils.import("resource://weave-identity/ext/resource.js");
 Components.utils.import("resource://weave-identity/constants.js");
+Components.utils.import("resource://ffpake/authinjector.js");
 
 function PAKEAuthProfile(realm) {
   this._init(realm);
@@ -20,6 +21,8 @@ PAKEAuthProfile.prototype = {
     this._log = Log4Moz.repository.getLogger(this._logName);
     this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
     this._log.debug("init for realm: '" + realm.realmUrl + "'");
+
+    this._authInjector = null;
   },
 
   sessionstatus: function() {
@@ -69,10 +72,10 @@ PAKEAuthProfile.prototype = {
 
     let ret = res.get();
     chal = ret.headers['WWW-Authenticate'];
-    resp = pakeAuth.generateCredentials(null, chal, false, null, 
-                                        username, password, 
-                                        {}, {}, {});
-    res.headers['Authorization'] = resp;
+    let authHeader2 = pakeAuth.generateCredentials(null, chal, false, null, 
+                                                   username, password, 
+                                                   {}, {}, {});
+    res.headers['Authorization'] = authHeader2;
     ret = res.get();
 
     if (ret.success && typeof(ret.headers['Authentication-Info']) != 'undefined') {
@@ -85,5 +88,21 @@ PAKEAuthProfile.prototype = {
     }
 
     this._realm.statusChange(ret.headers['X-Account-Management-Status']);
-  }
+
+    this._startAuthInjector(authHeader2);
+  },
+  
+    _startAuthInjector: function(authHeader) {
+        if (this._authInjector) {
+            this._authInjector.unregister();
+            this._authInjector = null;
+        }
+        
+        this._authInjector = new HttpPakeAuthInjector(authHeader);
+        this._authInjector.register();
+    }
 };
+
+
+/********************************************/
+
