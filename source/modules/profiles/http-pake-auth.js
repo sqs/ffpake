@@ -94,14 +94,36 @@ PAKEAuthProfile.prototype = {
     /* TODO(sqs): !!! remove hardcoded 'localhost' */
     this._startAuthInjector('localhost', authHeader2);
   },
+
+    disconnect: function() {
+        if (!this._realm.lock(this._realm.SIGNING_OUT))
+            return;
+        this._log.trace('Disconnecting');
+
+        if (this._profile.disconnect) {
+            this._do_disconnect();
+        } else
+            this._log.warn('No supported methods in common for disconnect');
+    },
+
+    _do_disconnect: function() {
+        let disconnect = this._profile.disconnect;
+        let res = new Resource(this._realm.domain.obj.resolve(disconnect.path));
+        let params;
+        this._stopAuthInjector();
+        this._realm.statusChange(res.get(params).headers['X-Account-Management-Status']);
+    },
   
     _startAuthInjector: function(host, authHeader) {
+        this._stopAuthInjector(); // only stops if one is already running
+        this._authInjector = new HttpPakeAuthInjector(host, authHeader);
+        this._authInjector.register();
+    },
+
+    _stopAuthInjector: function() {
         if (this._authInjector) {
             this._authInjector.unregister();
             this._authInjector = null;
         }
-        
-        this._authInjector = new HttpPakeAuthInjector(host, authHeader);
-        this._authInjector.register();
     }
 };
