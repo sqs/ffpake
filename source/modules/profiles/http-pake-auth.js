@@ -32,8 +32,9 @@ PAKEAuthProfile.prototype = {
     if (query && query.method == 'GET') {
       let res = new Resource(this._realm.domain.obj.resolve(query.path));
       this._realm.statusChange(res.get().headers['X-Account-Management-Status']);
-    } else
+    } else {
       this._log.warn('No supported methods in common for query');
+    }
   },
 
   connect: function() {
