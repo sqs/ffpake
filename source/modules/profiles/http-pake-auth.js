@@ -82,17 +82,18 @@ PAKEAuthProfile.prototype = {
         this._log.debug('PAKEAuthProfile SUCCESS');
         this._log.trace('RES2 Authentication-Info: ' + ret.headers['Authentication-Info']);
         // TODO(sqs): mutual auth -- check server resps
+
+        this._realm.statusChange(ret.headers['X-Account-Management-Status']);
+
+        /* TODO(sqs): should allow customization further than just setting the
+         * domain */
+        /* TODO(sqs): !!! remove hardcoded 'localhost' */
+        this._startAuthInjector('localhost', authHeader2);
     } else {
+        // Login failed
         this._log.error("HTTP PAKE authentication failed");
         this._log.trace("HTTP response headers: " + ret.headers.toSource());
     }
-
-    this._realm.statusChange(ret.headers['X-Account-Management-Status']);
-
-    /* TODO(sqs): should allow customization further than just setting the
-     * domain */
-    /* TODO(sqs): !!! remove hardcoded 'localhost' */
-    this._startAuthInjector('localhost', authHeader2);
   },
 
     disconnect: function() {
