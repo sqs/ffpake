@@ -91,7 +91,7 @@ PAKEAuthProfile.prototype = {
 
     /* TODO(sqs): should allow customization further than just setting the
      * domain */
-    
+    /* TODO(sqs): !!! remove hardcoded 'localhost' */
     this._startAuthInjector('localhost', authHeader2);
   },
   
