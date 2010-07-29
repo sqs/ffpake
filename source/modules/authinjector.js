@@ -4,6 +4,8 @@ const EXPORTED_SYMBOLS = ['HttpPakeAuthInjector'];
 Components.utils.import("resource://ffpake/ext/log4moz.js");
 Components.utils.import("resource://ffpake/util.js");
 
+/* TODO: should see if its Authorization attempts fail, and if so, unregister
+ * itself */
 
 function HttpPakeAuthInjector(host, authHeader) {
     this._host = host;
