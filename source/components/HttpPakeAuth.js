@@ -30,8 +30,7 @@ HTTPPAKEAuth.prototype = {
                               aContinuationState, aInvalidatesIdentity) {
     this._log.trace("challengeReceived: " +
                     "\n\tchallenge: '" + aChallenge + "'" +
-                    "\n\tsessionState: " + aSessionState.toSource() +
-                    "\n\tcontinuationState: " + aContinuationState.toSource());
+                    "\n\tsessionState: " + aSessionState.toSource());
 
     let chal = this._parseHeader(aChallenge);
     if (!('Y' in chal)) { // stage 1
@@ -54,24 +53,21 @@ HTTPPAKEAuth.prototype = {
     this._log.trace("generateCredentials: " +
                     "\n\tchannel: " + (aChannel ? aChannel.value : "null") + 
                     "\n\tchallenge: '" + aChallenge + "'" +
-                    "\n\tuser: '" + aUser + "' password: '" + aPassword + "'" +
-                    "\n\tsessionState: " + aSessionState.toSource() +
-                    "\n\tcontinuationState: " + aContinuationState.toSource() +
-                    "\n\tsessionState: " + aSessionState.toSource());
+                    "\n\tuser: '" + aUser + "' password: '" + aPassword + "'");
 
     let chal = this._parseHeader(aChallenge);
     let response;
     if (!('Y' in chal)) { // stage 1
       response = "PAKE username=\"" + aUser + "\" " +
-        "realm=\"" + chal['realm'] + "\"";
+                 "realm=\"" + chal['realm'] + "\"";
     } else { // stage 2
       this._pake.client_set_credentials(aUser, chal['realm'], aPassword);
       this._pake.client_recv_Y(chal['Y']);
       let sid = 1122334455;
       response = "PAKE username=\"" + aUser + "\" " +
-      "realm=\"" + chal['realm'] + "\" " +
-      "X=\"" + this._pake.client_get_X_string() + "\" " +
-      "respc=\"" + this._pake.compute_respc(sid) + "\"";
+                 "realm=\"" + chal['realm'] + "\" " +
+                 "X=\"" + this._pake.client_get_X_string() + "\" " +
+                 "respc=\"" + this._pake.compute_respc(sid) + "\"";
     }
         
     // TODO(sqs): mutual auth -- check resps
