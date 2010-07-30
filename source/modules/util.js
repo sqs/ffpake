@@ -42,11 +42,11 @@ const Cr = Components.results;
 const Cu = Components.utils;
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-Cu.import("resource://ffpake/ext/Preferences.js");
-Cu.import("resource://ffpake/ext/Observers.js");
-Cu.import("resource://ffpake/ext/StringBundle.js");
-Cu.import("resource://ffpake/ext/log4moz.js");
-Cu.import("resource://ffpake/constants.js");
+Cu.import("resource://weave-identity/ext/Preferences.js");
+Cu.import("resource://weave-identity/ext/Observers.js");
+Cu.import("resource://weave-identity/ext/StringBundle.js");
+Cu.import("resource://weave-identity/ext/log4moz.js");
+Cu.import("resource://weave-identity/constants.js");
 
 /*
  * Utility functions
@@ -804,14 +804,18 @@ let Utils = {
     return null;
   },
 
-  persistLogin: function(username, password, domain, realm) {
-    let logins = Svc.Login.findLogins({}, domain, domain, realm);
+  removeLogins: function(username, domain, realm, tryharder) {
+      let logins = Svc.Login.findLogins({}, domain, domain, realm, tryharder);
 
-    // Clean up any existing passwords
     for each (let login in logins) {
       if (login.username == username)
         Svc.Login.removeLogin(login);
     }
+  },
+
+  persistLogin: function(username, password, domain, realm) {
+    // Clean up any existing passwords
+    this.removeLogins(username, domain, realm);
 
     // Add the new username/password
     let nsLoginInfo = new Components.Constructor(
