@@ -69,10 +69,15 @@ HTTPPAKEAuth.prototype = {
                  "X=\"" + this._pake.client_get_X_string() + "\" " +
                  "respc=\"" + this._pake.compute_respc(sid) + "\"";
     }
-        
-    // TODO(sqs): mutual auth -- check resps
-
+    
     this._log.trace("PAKE response: " + response + "\n");
+
+    // Mutual auth.
+    // If aChannel is null, then this was called from
+    // http-pake-auth.js and it performs its own mutual auth.
+    if (aChannel) {
+      aChannel.notificationCallbacks = new serverAuthListener();
+    }
        
     return response;
   },
@@ -114,5 +119,43 @@ HTTPPAKEAuth.prototype = {
   }
 
 };
+
+function serverAuthListener() {
+  dump("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+}
+
+serverAuthListener.prototype = {
+  getInterface: function(aIID) {
+    return this.QueryInterface(aIID);
+  },
+
+  QueryInterface: function(aIID) {
+    if (aIID.equals(Components.interfaces.nsIProgressEventSink) ||
+        aIID.equals(Components.interfaces.nsIInterfaceRequestor) ||
+        aIID.equals(Components.interfaces.nsISupports))
+      return this;
+
+    throw Components.results.NS_ERROR_NO_INTERFACE;
+  },
+
+  onProgress: function onProgress(aRequest, aContext, aProgress, aProgressMax) {
+    dump("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+    let log = Log4Moz.repository.getLogger("HTTPPAKEAuth.serverAuthListener");
+    log.level =
+      Log4Moz.Level[Svc.Prefs.get("log.logger.httpauth")];
+    log.debug("onProgress: byte count " + aProgress + "/" + aProgressMax);
+    dump("##########################################################\n");
+  }
+};
+
+function ServerAuthListener2(logger) {
+  this._log = logger;
+}
+ServerAuthListener2.prototype = {
+  onStopRequest: function Channel_onStopRequest(channel, context, status) {
+    dump("################################# " + status + "\n");
+  },
+};
+
 
 const NSGetFactory = XPCOMUtils.generateNSGetFactory([HTTPPAKEAuth]);
