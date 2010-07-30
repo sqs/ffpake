@@ -9,6 +9,7 @@ Components.utils.import("resource://ffpake/authinjector.js");
 function PAKEAuthProfile(realm) {
   this._init(realm);
 }
+
 PAKEAuthProfile.prototype = {
   _logName: "PAKEAuthProfile",
   _logPref: "log.logger.account",
@@ -48,6 +49,7 @@ PAKEAuthProfile.prototype = {
       this._log.warn('No supported methods for connect');
     }
   },
+
   _do_connect: function() {
     let connect = this._profile.connect;
     let logins = Utils.getLogins(this._realm.domain, this._realm.realmUrl, null, true);
@@ -66,7 +68,7 @@ PAKEAuthProfile.prototype = {
     
     let resp = pakeAuth.generateCredentials(null, chal, false, null,
                                             username, password, 
-                                            {}, {}, {});
+{}, {}, {});
 
     let res = new Resource(this._realm.domain.obj.resolve(connect.path));
     res.headers['Authorization'] = resp;
@@ -75,55 +77,55 @@ PAKEAuthProfile.prototype = {
     chal = ret.headers['WWW-Authenticate'];
     let authHeader2 = pakeAuth.generateCredentials(null, chal, false, null, 
                                                    username, password, 
-                                                   {}, {}, {});
+{}, {}, {});
     res.headers['Authorization'] = authHeader2;
     ret = res.get();
 
     if (ret.success && typeof(ret.headers['Authentication-Info']) != 'undefined') {
-        this._log.debug('PAKEAuthProfile SUCCESS');
-        this._log.trace('RES2 Authentication-Info: ' + ret.headers['Authentication-Info']);
-        // TODO(sqs): mutual auth -- check server resps
+      this._log.debug('PAKEAuthProfile SUCCESS');
+      this._log.trace('RES2 Authentication-Info: ' + ret.headers['Authentication-Info']);
+      // TODO(sqs): mutual auth -- check server resps
 
-        this._realm.statusChange(ret.headers['X-Account-Management-Status']);
+      this._realm.statusChange(ret.headers['X-Account-Management-Status']);
 
-        let uri = this._realm.domain.obj;
-        this._startAuthInjector(uri.host, uri.port, authHeader2);
+      let uri = this._realm.domain.obj;
+      this._startAuthInjector(uri.host, uri.port, authHeader2);
     } else {
-        // Login failed
-        this._log.error("HTTP PAKE authentication failed");
-        this._log.trace("HTTP response headers: " + ret.headers.toSource());
+      // Login failed
+      this._log.error("HTTP PAKE authentication failed");
+      this._log.trace("HTTP response headers: " + ret.headers.toSource());
     }
   },
 
-    disconnect: function() {
-        if (!this._realm.lock(this._realm.SIGNING_OUT))
-            return;
-        this._log.trace('Disconnecting');
+  disconnect: function() {
+    if (!this._realm.lock(this._realm.SIGNING_OUT))
+      return;
+    this._log.trace('Disconnecting');
 
-        if (this._profile.disconnect) {
-            this._do_disconnect();
-        } else
-            this._log.warn('No supported methods in common for disconnect');
-    },
+    if (this._profile.disconnect) {
+      this._do_disconnect();
+    } else
+      this._log.warn('No supported methods in common for disconnect');
+  },
 
-    _do_disconnect: function() {
-        let disconnect = this._profile.disconnect;
-        let res = new Resource(this._realm.domain.obj.resolve(disconnect.path));
-        let params;
-        this._stopAuthInjector();
-        this._realm.statusChange(res.get(params).headers['X-Account-Management-Status']);
-    },
+  _do_disconnect: function() {
+    let disconnect = this._profile.disconnect;
+    let res = new Resource(this._realm.domain.obj.resolve(disconnect.path));
+    let params;
+    this._stopAuthInjector();
+    this._realm.statusChange(res.get(params).headers['X-Account-Management-Status']);
+  },
   
   _startAuthInjector: function(host, port, authHeader) {
-        this._stopAuthInjector(); // only stops if one is already running
-        this._authInjector = new HttpPakeAuthInjector(host, port, authHeader);
-        this._authInjector.register();
-    },
+    this._stopAuthInjector(); // only stops if one is already running
+    this._authInjector = new HttpPakeAuthInjector(host, port, authHeader);
+    this._authInjector.register();
+  },
 
-    _stopAuthInjector: function() {
-        if (this._authInjector) {
-            this._authInjector.unregister();
-            this._authInjector = null;
-        }
+  _stopAuthInjector: function() {
+    if (this._authInjector) {
+      this._authInjector.unregister();
+      this._authInjector = null;
     }
+  }
 };

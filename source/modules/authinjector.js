@@ -10,45 +10,45 @@ Components.utils.import("resource://ffpake/util.js");
 /* Observes all HTTP requests to host:port and injects an Authorization:
  * header. */
 function HttpPakeAuthInjector(host, port, authHeader) {
-    this._host = host;
-    this._port = port;
-    this._authHeader = authHeader;
-    this._initLogs();
+  this._host = host;
+  this._port = port;
+  this._authHeader = authHeader;
+  this._initLogs();
 }
 
 HttpPakeAuthInjector.prototype = {    
-    _logName: "HttpPakeAuthInjector",
-    _logPref: "log.loggers.account",
+  _logName: "HttpPakeAuthInjector",
+  _logPref: "log.loggers.account",
 
-    observe: function(subject, topic, data) {
-        if (topic == "http-on-modify-request") {
-            var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-            if (httpChannel.URI.host == this._host &&
-                httpChannel.URI.port == this._port) {
-                this._log.trace("injecting Authorization: " + this._authHeader);
-                httpChannel.setRequestHeader("Authorization", this._authHeader, false);
-            }
-        }
-    },
-
-    get observerService() {
-        return Components.classes["@mozilla.org/observer-service;1"]
-               .getService(Components.interfaces.nsIObserverService);
-    },
-
-    register: function() {
-        this.observerService.addObserver(this, "http-on-modify-request", false);
-    },
-
-    unregister: function() {
-        this.observerService.removeObserver(this, "http-on-modify-request");
-    },
-
-    _initLogs: function() {
-        this._log = Log4Moz.repository.getLogger(this._logName);
-        this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
-        this._log.trace("HttpPakeAuthInjector init: " + this._authHeader);
+  observe: function(subject, topic, data) {
+    if (topic == "http-on-modify-request") {
+      var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
+      if (httpChannel.URI.host == this._host &&
+          httpChannel.URI.port == this._port) {
+        this._log.trace("injecting Authorization: " + this._authHeader);
+        httpChannel.setRequestHeader("Authorization", this._authHeader, false);
+      }
     }
+  },
+
+  get observerService() {
+    return Components.classes["@mozilla.org/observer-service;1"]
+    .getService(Components.interfaces.nsIObserverService);
+  },
+
+  register: function() {
+    this.observerService.addObserver(this, "http-on-modify-request", false);
+  },
+
+  unregister: function() {
+    this.observerService.removeObserver(this, "http-on-modify-request");
+  },
+
+  _initLogs: function() {
+    this._log = Log4Moz.repository.getLogger(this._logName);
+    this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
+    this._log.trace("HttpPakeAuthInjector init: " + this._authHeader);
+  }
 };
 
 
