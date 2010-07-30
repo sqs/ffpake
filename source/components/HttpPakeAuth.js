@@ -65,13 +65,6 @@ HTTPPAKEAuth.prototype = {
       response = "PAKE username=\"" + aUser + "\" " +
         "realm=\"" + chal['realm'] + "\"";
     } else { // stage 2
-      if (!aUser && !aPassword) {
-        // TODO(sqs): The only way to stop this duplicate auth from
-        // happening is to throw here. Calling .cancel() on the channel
-        // doesn't work.
-        throw "must have username and password in stage2 generateCredentials";
-      }
-
       this._pake.client_set_credentials(aUser, chal['realm'], aPassword);
       this._pake.client_recv_Y(chal['Y']);
       let sid = 1122334455;
