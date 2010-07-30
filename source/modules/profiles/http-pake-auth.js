@@ -86,10 +86,8 @@ PAKEAuthProfile.prototype = {
 
         this._realm.statusChange(ret.headers['X-Account-Management-Status']);
 
-        /* TODO(sqs): should allow customization further than just setting the
-         * domain */
-        /* TODO(sqs): !!! remove hardcoded 'localhost' */
-        this._startAuthInjector('localhost', authHeader2);
+        let uri = this._realm.domain.obj;
+        this._startAuthInjector(uri.host, uri.port, authHeader2);
     } else {
         // Login failed
         this._log.error("HTTP PAKE authentication failed");
@@ -116,9 +114,9 @@ PAKEAuthProfile.prototype = {
         this._realm.statusChange(res.get(params).headers['X-Account-Management-Status']);
     },
   
-    _startAuthInjector: function(host, authHeader) {
+  _startAuthInjector: function(host, port, authHeader) {
         this._stopAuthInjector(); // only stops if one is already running
-        this._authInjector = new HttpPakeAuthInjector(host, authHeader);
+        this._authInjector = new HttpPakeAuthInjector(host, port, authHeader);
         this._authInjector.register();
     },
 

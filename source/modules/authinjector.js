@@ -7,8 +7,11 @@ Components.utils.import("resource://ffpake/util.js");
 /* TODO: should see if its Authorization attempts fail, and if so, unregister
  * itself */
 
-function HttpPakeAuthInjector(host, authHeader) {
+/* Observes all HTTP requests to host:port and injects an Authorization:
+ * header. */
+function HttpPakeAuthInjector(host, port, authHeader) {
     this._host = host;
+    this._port = port;
     this._authHeader = authHeader;
     this._initLogs();
 }
@@ -20,7 +23,8 @@ HttpPakeAuthInjector.prototype = {
     observe: function(subject, topic, data) {
         if (topic == "http-on-modify-request") {
             var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-            if (httpChannel.URI.host == this._host) {
+            if (httpChannel.URI.host == this._host &&
+                httpChannel.URI.port == this._port) {
                 this._log.trace("injecting Authorization: " + this._authHeader);
                 httpChannel.setRequestHeader("Authorization", this._authHeader, false);
             }
