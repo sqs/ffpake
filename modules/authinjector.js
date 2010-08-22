@@ -40,7 +40,6 @@ HttpPakeAuthInjector.prototype = {
 
   start: function() {
     Services.obs.addObserver(this, HTTP_ON_MODIFY_REQUEST, false);
-    this.log("started");
   },
 
   stop: function() {
