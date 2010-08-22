@@ -97,7 +97,8 @@ HttpPakeAuthProfile.prototype = {
 
   _sharedConnect: function connect({autoconnect, createOnSuccess, password, username}, realm, onComplete) {
     let connectInfo = realm.auth[this.name].connect;
-    let res = new Resource(realm.url.resolve(connectInfo.path));
+    let uniqPath = connectInfo.path + "?" + Date.now();
+    let res = new Resource(realm.url.resolve(uniqPath));
 
     this._sharedConnect_clientIdentify({
         autoconnect: autoconnect,
