@@ -130,8 +130,6 @@ HttpPakeAuthProfile.prototype = {
   _make_sharedConnect_clientAuth: function connect_ca({autoconnect, createOnSuccess, password, username}, realm, connectInfo, res, onComplete) {
     let self = this;
     return function(result) {
-      self.Assert_Server_Response_to_Client_Auth(result.headers);
-
       chal = result.headers['www-authenticate'];
       let authHdr2 = self._pakeAuth.generateCredentials(
                        null, chal, false, null, 
@@ -200,19 +198,6 @@ HttpPakeAuthProfile.prototype = {
       this._authInjector.stop();
       this._authInjector = null;
       // TODO(sqs): support for multiple auth injectors
-    }
-  },
-
-  Assert_Server_Response_to_Client_Auth: function(headers) {
-    let errors = [];
-    if (!('www-authenticate' in headers))
-      errors.push('no WWW-Authenticate from server');
-
-    if (errors.length) {
-      this.log('Assert_Server_Response_to_Client_Auth: \n' + 
-               errors.join("\n * ") + "\n");
-      this.log('HTTP response headers: ' + headers.toSource());
-      throw('Assert_Server_Response_to_Client_Auth');
     }
   }
 };
