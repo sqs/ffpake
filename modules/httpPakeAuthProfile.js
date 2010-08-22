@@ -130,6 +130,12 @@ HttpPakeAuthProfile.prototype = {
   _make_sharedConnect_clientAuth: function connect_ca({autoconnect, createOnSuccess, password, username}, realm, connectInfo, res, onComplete) {
     let self = this;
     return function(result) {
+      if (!('www-authenticate' in result.headers)) {
+        self.log('no www-authenticate from server for client auth stage');
+        self.log('headers: ' + result.headers.toSource());
+        return;
+      }
+
       chal = result.headers['www-authenticate'];
       let authHdr2 = self._pakeAuth.generateCredentials(null, chal, false, null,
                                                         username, password, {}, {}, {});
@@ -149,7 +155,7 @@ HttpPakeAuthProfile.prototype = {
     return function(result) {
       self.handleStatusAction(result.success, connectInfo, onComplete);
 
-      if (result.success && createOnSuccess) {
+      if (result.success) {
         self.log('HttpPakeAuthProfile SUCCESS');
         self.log('RES2 Authentication-Info: ' + result.headers['authentication-info']);
         // TODO(sqs): mutual auth -- check server resps
@@ -159,10 +165,13 @@ HttpPakeAuthProfile.prototype = {
 
         self._startAuthInjector(realmURI.host, realmURI.port, authHdr2);
 
-        let nsLoginInfo = new Components.Constructor(
-                                                     "@mozilla.org/login-manager/loginInfo;1", Ci.nsILoginInfo, "init");
-        self._lm.addLogin(new nsLoginInfo(hostname, hostname, null, username,
-                                          password, "username", "password"));
+        if (createOnSuccess) {
+          let nsLoginInfo = new Components.Constructor(
+                              "@mozilla.org/login-manager/loginInfo;1",
+                              Ci.nsILoginInfo, "init");
+          self._lm.addLogin(new nsLoginInfo(hostname, hostname, null, username,
+                                            password, "username", "password"));
+        }
       } else {
         // Login failed
         self.log("HTTP PAKE authentication failed");
@@ -197,5 +206,5 @@ HttpPakeAuthProfile.prototype = {
       // TODO(sqs): support for multiple auth injectors
     }
   }
-
 };
+
