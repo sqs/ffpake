@@ -5,6 +5,10 @@ locale    ffpake   en-US         chrome/locale/en-US/
 component {7beae336-6b83-4452-8b5f-dd6f75068718} components/HttpPakeAuth.js
 contract @mozilla.org/network/http-authenticator;1?scheme=pake {7beae336-6b83-4452-8b5f-dd6f75068718}
 
+component {acd6b6c0-4a72-4fe7-85c7-dd341306778b} components/HttpPakeAuthAccountManagerService.js
+contract @scs.stanford.edu/ffpakeam;1 {acd6b6c0-4a72-4fe7-85c7-dd341306778b}
+category profile-after-change HttpPakeAuthAccountManagerService @scs.stanford.edu/ffpakeam;1
+
 overlay   chrome://browser/content/browser.xul   chrome://ffpake/content/ff-overlay.xul
 
 resource ffpake modules/

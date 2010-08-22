@@ -1,7 +1,4 @@
-
-
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");  
-Components.utils.import("resource://ffpake/ext/log4moz.js");
 Components.utils.import("resource://ffpake/util.js");
 Components.utils.import("resource://ffpake/ext/jspake/core/pake.ctypes.js");
 
@@ -14,21 +11,17 @@ HTTPPAKEAuth.prototype = {
   classID: Components.ID('{7beae336-6b83-4452-8b5f-dd6f75068718}'),
   contractID: "@mozilla.org/network/http-authenticator;1?scheme=pake",
 
-  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIHttpAuthenticator]),    
+  QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIHttpAuthenticator]),
 
-  _logName: "HTTPPAKEAuth",
-  _logPref: "log.logger.httpauth",
-
+  _log: function(s) { dump("*** HTTPPAKEAuth: " + s + "\n"); },
 
   init: function() {
-    this._log = Log4Moz.repository.getLogger(this._logName);
-    this._log.level = Log4Moz.Level[Svc.Prefs.get(this._logPref)];
     this._pake = new pake(1);
   },
 
   challengeReceived: function(aChannel, aChallenge, aProxyAuth, aSessionState,
                               aContinuationState, aInvalidatesIdentity) {
-    this._log.trace("challengeReceived: " +
+    this._log("challengeReceived: " +
                     "\n\tchallenge: '" + aChallenge + "'" +
                     "\n\tsessionState: " + aSessionState.toSource());
 
@@ -42,7 +35,7 @@ HTTPPAKEAuth.prototype = {
       aInvalidatesIdentity.value = false;
     }
 
-    this._log.trace("PAKE challengeReceived DONE, " +
+    this._log("PAKE challengeReceived DONE, " +
                     (aInvalidatesIdentity.value ? "invalidate identity" :
                      "don't invalidate identity"));
   },
@@ -50,7 +43,7 @@ HTTPPAKEAuth.prototype = {
   generateCredentials: function(aChannel, aChallenge, aProxyAuth, aDomain,
                                 aUser, aPassword, aSessionState, 
                                 aContinuationState, aFlags) {
-    this._log.trace("generateCredentials: " +
+    this._log("generateCredentials: " +
                     "\n\tchannel: " + (aChannel ? aChannel.value : "null") + 
                     "\n\tchallenge: '" + aChallenge + "'" +
                     "\n\tuser: '" + aUser + "' password: '" + aPassword + "'");
@@ -70,7 +63,7 @@ HTTPPAKEAuth.prototype = {
                  "respc=\"" + this._pake.compute_respc(sid) + "\"";
     }
     
-    this._log.trace("PAKE response: " + response + "\n");
+    this._log("PAKE response: " + response + "\n");
 
     // Mutual auth.
     // If aChannel is null, then this was called from
@@ -95,7 +88,9 @@ HTTPPAKEAuth.prototype = {
   _authName: 'PAKE',
 
   _parseHeader: function(header) {
-    /// this._log.trace("PAKE _parseHeader: " + header + "\n");
+    /// this._log("PAKE _parseHeader: " + header + "\n");
+
+    if (!header) throw 'null-header';
 
     // TODO(sqs): "PAKE" should be case insensitive
     let prefix = this._authName + ' ';
