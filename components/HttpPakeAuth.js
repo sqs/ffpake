@@ -67,7 +67,7 @@ HTTPPAKEAuth.prototype = {
 
     // Mutual auth.
     // If aChannel is null, then this was called from
-    // http-pake-auth.js and it performs its own mutual auth.
+    // httpPakeAuthProfile.js and it performs its own mutual auth.
     if (aChannel) {
       aChannel.notificationCallbacks = new serverAuthListener();
     }
