@@ -108,15 +108,12 @@ HttpPakeAuthProfile.prototype = {
   },
 
   _sharedConnect_clientIdentify: function connect_cid({autoconnect, createOnSuccess, password, username}, realm, connectInfo, res, onComplete) {
-
-    this.log("pake client_set_credentials(" + username + ", " + realm.url.spec + ", " + password + ")");
-
     // Make fake auth challenge header based on AMCD.
     let chal = "PAKE realm=\"" + realm.url.spec + "\"";
     
-    let resp = this._pakeAuth.generateCredentials(null, chal, false, null,
-                                            username, password, 
-                                            {}, {}, {});
+    let resp = this._pakeAuth.generateCredentials(
+                 null, chal, false, null,
+                 username, password, {}, {}, {});
     res.headers['authorization'] = resp;
 
     res.get(this._make_sharedConnect_clientAuth({
@@ -130,15 +127,10 @@ HttpPakeAuthProfile.prototype = {
   _make_sharedConnect_clientAuth: function connect_ca({autoconnect, createOnSuccess, password, username}, realm, connectInfo, res, onComplete) {
     let self = this;
     return function(result) {
-      if (!('www-authenticate' in result.headers)) {
-        self.log('no www-authenticate from server for client auth stage');
-        self.log('headers: ' + result.headers.toSource());
-        return;
-      }
-
       chal = result.headers['www-authenticate'];
-      let authHdr2 = self._pakeAuth.generateCredentials(null, chal, false, null,
-                                                        username, password, {}, {}, {});
+      let authHdr2 = self._pakeAuth.generateCredentials(
+                       null, chal, false, null, 
+                       username, password, {}, {}, {});
       res.headers['authorization'] = authHdr2;
 
       res.get(self._make_sharedConnect_serverAuth({
@@ -156,8 +148,6 @@ HttpPakeAuthProfile.prototype = {
       self.handleStatusAction(result.success, connectInfo, onComplete);
 
       if (result.success) {
-        self.log('HttpPakeAuthProfile SUCCESS');
-        self.log('RES2 Authentication-Info: ' + result.headers['authentication-info']);
         // TODO(sqs): mutual auth -- check server resps
 
         let realmURI = realm.url;
