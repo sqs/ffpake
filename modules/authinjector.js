@@ -1,48 +1,51 @@
 const EXPORTED_SYMBOLS = ['HttpPakeAuthInjector'];
 
-Components.utils.import("resource://ffpake/util.js");
+const Ci = Components.interfaces;
+const Cu = Components.utils;
+
+Cu.import("resource://gre/modules/Services.jsm");
+Cu.import("resource://gre/modules/accountmanager/base.js");
 
 /* TODO: should see if its Authorization attempts fail, and if so, unregister
  * itself */
 
-/* Observes all HTTP requests to host:port and injects an Authorization:
- * header. */
+const HTTP_ON_MODIFY_REQUEST = "http-on-modify-request";
+
 function HttpPakeAuthInjector(host, port, authHeader) {
-  this._host = host;
-  this._port = port;
-  this._authHeader = authHeader;
+  BaseClass.apply(this);
+  this.host = host;
+  this.port = port;
+  this.authHeader = authHeader;
   this.init();
 }
 
 HttpPakeAuthInjector.prototype = {
+  __proto__: BaseClass.prototype,
+  prefBranchStr: "extensions.ffpake.",
+  logName: "HttpPakeAuthInjector",
+
   init: function() {
-    this._log("HttpPakeAuthInjector init: " + this._authHeader);
+    this.log("init with Authorization: " + this.authHeader);
   },
 
-  _log: function(s) { dump("*** HttpPakeAuthInjector: " + s + "\n"); },
-
   observe: function(subject, topic, data) {
-    if (topic == "http-on-modify-request") {
+    if (topic == HTTP_ON_MODIFY_REQUEST) {
       var httpChannel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-      if (httpChannel.URI.host == this._host &&
-          httpChannel.URI.port == this._port) {
-        this._log("injecting Authorization: " + this._authHeader);
-        httpChannel.setRequestHeader("Authorization", this._authHeader, false);
+      if (httpChannel.URI.host == this.host && httpChannel.URI.port == this.port) {
+        this.log("injecting Authorization: " + this.authHeader);
+        httpChannel.setRequestHeader("Authorization", this.authHeader, false);
       }
     }
   },
 
-  get observerService() {
-    return Components.classes["@mozilla.org/observer-service;1"]
-    .getService(Components.interfaces.nsIObserverService);
+  start: function() {
+    Services.obs.addObserver(this, HTTP_ON_MODIFY_REQUEST, false);
+    this.log("started");
   },
 
-  register: function() {
-    this.observerService.addObserver(this, "http-on-modify-request", false);
-  },
-
-  unregister: function() {
-    this.observerService.removeObserver(this, "http-on-modify-request");
+  stop: function() {
+    Services.obs.removeObserver(this, HTTP_ON_MODIFY_REQUEST);
+    this.log("stopped");
   }
 };
 
