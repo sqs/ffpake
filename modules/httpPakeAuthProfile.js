@@ -65,7 +65,7 @@ HttpPakeAuthProfile.prototype = {
   },
 
   createAccount: function createAccount(realm, onComplete) {
-    this._async(function() onComplete("popup", "form-welcome"));
+    this._async(function() onComplete("popup", "pake-welcome"));
   },
 
   connect: function connect(account, autoconnect, realm, onComplete) {
