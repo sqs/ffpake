@@ -36,20 +36,12 @@ HttpPakeAuthAccountManagerService.prototype = {
         Services.obs.addObserver(this, "sessionstore-windows-restored", false);
         break;
       case "sessionstore-windows-restored":
-        dump("BBBBBBBBBBBBBBBBBBBBBBBBBBBBb\n");
         Services.obs.addObserver(this, "acctmgr-profile-manager-start", false);
         break;
       case "acctmgr-profile-manager-start":
         try {
           Cu.import("resource://gre/modules/accountmanager/profiles.js");
-          // TODO(sqs): patch services.js defineLazyGetter part (sets =null
-          // before overwrites Service attribute on Profiles
-          setTimeout(function() {
-            Profiles.Service.registerProfile(HttpPakeAuthProfile);
-          }, 50);
-          // TODO: for now, just have the notification send itself as the subject
-          dump("subject = " + subject + " : type=" + data + "\n");
-          //Profiles.Service.Auth.registerProfile(HttpPakeAuthProfile);
+          Profiles.Service.registerProfile(HttpPakeAuthProfile);
         } catch (e) {
           Cu.reportError(e);
         }
