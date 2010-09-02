@@ -6,7 +6,7 @@ const Cr = Components.results;
 const Cu = Components.utils;
 
 Cu.import("resource://gre/modules/Resource.jsm")
-Cu.import("resource://gre/modules/accountmanager/profiles.js");
+Cu.import("resource://gre/modules/accountmanager/profiles.jsm");
 Cu.import("resource://ffpake/authinjector.js");
 
 /*

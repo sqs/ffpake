@@ -4,7 +4,7 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 
 Cu.import("resource://gre/modules/Services.jsm");
-Cu.import("resource://gre/modules/accountmanager/base.js");
+Cu.import("resource://gre/modules/accountmanager/base.jsm");
 
 /* TODO: should see if its Authorization attempts fail, and if so, unregister
  * itself */
