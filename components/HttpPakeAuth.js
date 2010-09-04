@@ -33,10 +33,6 @@ HTTPPAKEAuth.prototype = {
       // credentials are invalid, the client discovers that after stage2.
       aInvalidatesIdentity.value = false;
     }
-
-    this._log("PAKE challengeReceived DONE, " +
-                    (aInvalidatesIdentity.value ? "invalidate identity" :
-                     "don't invalidate identity"));
   },
 
   generateCredentials: function(aChannel, aChallenge, aProxyAuth, aDomain,
