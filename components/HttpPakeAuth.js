@@ -56,7 +56,7 @@ HTTPPAKEAuth.prototype = {
       this._pake.client_set_credentials(aUser, chal['realm'], aPassword);
       this._pake.client_recv_Y(chal['Y']);
 
-      let sessid = "abcd123";
+      let sessid = null;
 
       response = "PAKE username=\"" + aUser + "\" " +
                  "realm=\"" + chal['realm'] + "\" " +
