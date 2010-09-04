@@ -61,7 +61,7 @@ HTTPPAKEAuth.prototype = {
       response = "PAKE username=\"" + aUser + "\" " +
                  "realm=\"" + chal['realm'] + "\" " +
                  "X=\"" + this._pake.client_get_X_string() + "\" " +
-                 "respc=\"" + this._pake.compute_respc(sid) + "\"";
+                 "respc=\"" + this._pake.compute_respc(sessid) + "\"";
     }
     
     this._log("PAKE response: " + response + "\n");
