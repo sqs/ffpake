@@ -1,5 +1,4 @@
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");  
-Components.utils.import("resource://ffpake/util.js");
 Components.utils.import("resource://ffpake/ext/jspake/core/pake.ctypes.js");
 
 function HTTPPAKEAuth() {
