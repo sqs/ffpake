@@ -1,6 +1,10 @@
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");  
 Components.utils.import("resource://ffpake/ext/jspake/core/pake.ctypes.js");
 
+var Cr = Components.results;
+
+var PAKEAuthName = "PAKE";
+
 function HTTPPAKEAuth() {
   this.init();
 }
@@ -43,6 +47,7 @@ HTTPPAKEAuth.prototype = {
                     "\n\tchallenge: '" + aChallenge + "'" +
                     "\n\tuser: '" + aUser + "' password: '" + aPassword + "'");
 
+    let self = this;
     let chal = this._parseHeader(aChallenge);
     let response;
     if (!('Y' in chal)) { // stage 1
@@ -58,31 +63,22 @@ HTTPPAKEAuth.prototype = {
                  "realm=\"" + chal['realm'] + "\" " +
                  "X=\"" + this._pake.client_get_X_string() + "\" " +
                  "respc=\"" + this._pake.compute_respc(sessid) + "\"";
+
+      // Mutual auth.
+      // If aChannel is null, then this was called from
+      // httpPakeAuthProfile.js and it performs its own mutual auth.
+      if (aChannel) {
+        let traceChannel = aChannel.QueryInterface(Components.interfaces.nsITraceableChannel);
+        let sl = new ServerAuthListener(this._parseHeader, this._pake.compute_resps(sessid), this._log);
+        sl.originalListener = traceChannel.setNewListener(sl);
+      }
+
     }
     
     this._log("PAKE response: " + response + "\n");
-
-    // Mutual auth.
-    // If aChannel is null, then this was called from
-    // httpPakeAuthProfile.js and it performs its own mutual auth.
-    if (aChannel) {
-      aChannel.notificationCallbacks = new serverAuthListener();
-    }
        
     return response;
   },
-
-  HeaderParseError: function(header, msg) {
-    let c = function _HeaderParseError(header, msg) {};
-    c.prototype = {
-      'toString': function () { 
-        return "HeaderParseError: " + msg + " (in header: " + header + ")"; 
-      }
-    };
-    return c(header, msg);
-  },
-
-  _authName: 'PAKE',
 
   _parseHeader: function(header) {
     /// this._log("PAKE _parseHeader: " + header + "\n");
@@ -90,9 +86,9 @@ HTTPPAKEAuth.prototype = {
     if (!header) throw 'null-header';
 
     // TODO(sqs): "PAKE" should be case insensitive
-    let prefix = this._authName + ' ';
+    let prefix = PAKEAuthName + ' ';
     if (header.indexOf(prefix) != 0) {
-      throw this.HeaderParseError(header, "auth name != 'PAKE'");
+      throw HeaderParseError(header, "auth name != 'PAKE'");
     }
 
     // Advance beyond "PAKE " prefix
@@ -112,41 +108,60 @@ HTTPPAKEAuth.prototype = {
 
 };
 
-function serverAuthListener() {
-  dump("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+function ServerAuthListener(parseHeader, expectedResps, logger) {
+  this.originalListener = null;
+  this.parseHeader = parseHeader;
+  this.expectedResps = expectedResps;
+  this._log = logger;
 }
 
-serverAuthListener.prototype = {
-  getInterface: function(aIID) {
-    return this.QueryInterface(aIID);
+ServerAuthListener.prototype = {
+  onStartRequest: function (aRequest, aContext) {
+    this.originalListener.onStartRequest(aRequest, aContext);
+  },
+  
+  onDataAvailable: function(request, context, inputStream, offset, count) {
+    this.originalListener.onDataAvailable(request, context, inputStream, offset, count);
   },
 
-  QueryInterface: function(aIID) {
-    if (aIID.equals(Components.interfaces.nsIProgressEventSink) ||
-        aIID.equals(Components.interfaces.nsIInterfaceRequestor) ||
-        aIID.equals(Components.interfaces.nsISupports))
+  onStopRequest: function Channel_onStopRequest(aRequest, aContext, aStatusCode) {
+    let httpChannel = aRequest.QueryInterface(Components.interfaces.nsIHttpChannel);
+    let authInfo = httpChannel.getResponseHeader("Authentication-Info");
+    this._log("authInfo = " + authInfo);
+    this.originalListener.onStopRequest(aRequest, aContext, aStatusCode);
+    aStatusCode.value = this.authInfoValidator(authInfo);
+  },
+
+  authInfoValidator: function (authInfo) {
+    let ai = this.parseHeader(authInfo);
+    if (!('resps' in ai)) {
+      this._log("No resps in server Authentication-Info: " + authInfo);
+      return Cr.NS_ERROR_FAILURE;
+    }
+    if (ai['resps'] != this.expectedResps) {
+      this._log("Bad resps in server Authentication-Info: " + authInfo);
+      return Cr.NS_ERROR_FAILURE;
+    }
+    return Cr.NS_OK;
+  },
+
+  QueryInterface: function (aIID) {
+    if (aIID.equals(Ci.nsIStreamListener) ||
+        aIID.equals(Ci.nsISupports)) {
       return this;
-
-    throw Components.results.NS_ERROR_NO_INTERFACE;
-  },
-
-  onProgress: function onProgress(aRequest, aContext, aProgress, aProgressMax) {
-    dump("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-    let log = Log4Moz.repository.getLogger("HTTPPAKEAuth.serverAuthListener");
-    log.level =
-      Log4Moz.Level[Svc.Prefs.get("log.logger.httpauth")];
-    log.debug("onProgress: byte count " + aProgress + "/" + aProgressMax);
-    dump("##########################################################\n");
+    }
+    throw Components.results.NS_NOINTERFACE;
   }
 };
 
-function ServerAuthListener2(logger) {
-  this._log = logger;
-}
-ServerAuthListener2.prototype = {
-  onStopRequest: function Channel_onStopRequest(channel, context, status) {
-    dump("################################# " + status + "\n");
-  },
+var HeaderParseError = function(header, msg) {
+  let c = function _HeaderParseError(header, msg) {};
+  c.prototype = {
+    'toString': function () { 
+      return "HeaderParseError: " + msg + " (in header: " + header + ")"; 
+    }
+  };
+  return c(header, msg);
 };
 
 
