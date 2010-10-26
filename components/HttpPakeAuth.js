@@ -61,7 +61,8 @@ HTTPPAKEAuth.prototype = {
       if (aChannel) {
         let chan = aChannel.QueryInterface(Components.interfaces.nsIChannel);
         let secInfo = chan.securityInfo.QueryInterface(Components.interfaces.tcITransportSessionInfo);
-        sessid = secInfo.sessionID;
+          if (secInfo && secInfo.sessionID)
+              sessid = secInfo.sessionID;
       }
 
       response = "PAKE username=\"" + aUser + "\" " +
