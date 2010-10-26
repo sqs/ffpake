@@ -57,7 +57,12 @@ HTTPPAKEAuth.prototype = {
       this._pake.client_set_credentials(aUser, chal['realm'], aPassword);
       this._pake.client_recv_Y(chal['Y']);
 
-      let sessid = null;
+      let sessid = "";
+      if (aChannel) {
+        let chan = aChannel.QueryInterface(Components.interfaces.nsIChannel);
+          let secInfo = chan.securityInfo.QueryInterface(Components.interfaces.tcITransportSessionInfo);
+          sessid = secInfo.sessionID;
+      }
 
       response = "PAKE username=\"" + aUser + "\" " +
                  "realm=\"" + chal['realm'] + "\" " +
