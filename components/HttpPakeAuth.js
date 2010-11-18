@@ -1,5 +1,6 @@
 Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");  
 Components.utils.import("resource://ffpake/ext/jspake/core/pake.ctypes.js");
+Components.utils.import("resource://fftcpcrypt/libtcpcrypt.js");
 
 var Cr = Components.results;
 
@@ -57,24 +58,27 @@ HTTPPAKEAuth.prototype = {
       this._pake.client_set_credentials(aUser, chal['realm'], aPassword);
       this._pake.client_recv_Y(chal['Y']);
 
-      let sessid = "";
+      let tcsessid = "";
       if (aChannel) {
         let chan = aChannel.QueryInterface(Components.interfaces.nsIChannel);
-        if (chan.securityInfo)
-          sessid = chan.securityInfo.QueryInterface(Components.interfaces.tcITransportSessionInfo).sessionID;
+        let uri = aChannel.URI;
+        let port = uri.port;
+        if (port == -1)
+          port = 80;
+        tcsessid = tcpcrypt_getsessid(uri.host, port);
       }
 
       response = "PAKE username=\"" + aUser + "\" " +
                  "realm=\"" + chal['realm'] + "\" " +
                  "X=\"" + this._pake.client_get_X_string() + "\" " +
-                 "respc=\"" + this._pake.compute_respc(sessid) + "\"";
+                 "respc=\"" + this._pake.compute_respc(tcsessid) + "\"";
 
       // Mutual auth.
       // If aChannel is null, then this was called from
       // httpPakeAuthProfile.js and it performs its own mutual auth.
       if (aChannel) {
         let traceChannel = aChannel.QueryInterface(Components.interfaces.nsITraceableChannel);
-        let sl = new ServerAuthListener(this._parseHeader, this._pake.compute_resps(sessid), this._log);
+        let sl = new ServerAuthListener(this._parseHeader, this._pake.compute_resps(tcsessid), this._log);
         sl.originalListener = traceChannel.setNewListener(sl);
       }
 
