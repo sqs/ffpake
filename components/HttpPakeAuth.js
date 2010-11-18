@@ -21,6 +21,7 @@ HTTPPAKEAuth.prototype = {
 
   init: function() {
     this._pake = new pake(1);
+    this.challengesSinceLastSuccess = 0;
   },
 
   challengeReceived: function(aChannel, aChallenge, aProxyAuth, aSessionState,
@@ -33,10 +34,11 @@ HTTPPAKEAuth.prototype = {
     if (!('Y' in chal)) { // stage 1
       aInvalidatesIdentity.value = true;
     } else { // stage 2
-      // The identity is never invalidated between stages 1 and 2 since
-      // they occur in sequence with no additional user prompting. If the
-      // credentials are invalid, the client discovers that after stage2.
-      aInvalidatesIdentity.value = false;
+      this.challengesSinceLastSuccess++;
+      if (this.challengesSinceLastSuccess > 1)
+        aInvalidatesIdentity.value = true;
+      else
+        aInvalidatesIdentity.value = false;
     }
   },
 
@@ -78,7 +80,7 @@ HTTPPAKEAuth.prototype = {
       // httpPakeAuthProfile.js and it performs its own mutual auth.
       if (aChannel) {
         let traceChannel = aChannel.QueryInterface(Components.interfaces.nsITraceableChannel);
-        let sl = new ServerAuthListener(this._parseHeader, this._pake.compute_resps(tcsessid), this._log);
+        let sl = new ServerAuthListener(this._parseHeader, this._pake.compute_resps(tcsessid), this, this._log);
         sl.originalListener = traceChannel.setNewListener(sl);
       }
 
@@ -117,10 +119,11 @@ HTTPPAKEAuth.prototype = {
 
 };
 
-function ServerAuthListener(parseHeader, expectedResps, logger) {
+function ServerAuthListener(parseHeader, expectedResps, httpPakeAuth, logger) {
   this.originalListener = null;
   this.parseHeader = parseHeader;
   this.expectedResps = expectedResps;
+  this.httpPakeAuth = httpPakeAuth;
   this._log = logger;
 }
 
@@ -151,6 +154,7 @@ ServerAuthListener.prototype = {
       this._log("Bad resps in server Authentication-Info: " + authInfo);
       return Cr.NS_ERROR_FAILURE;
     }
+    this.httpPakeAuth.challengesSinceLastSuccess = 0;
     return Cr.NS_OK;
   },
 
